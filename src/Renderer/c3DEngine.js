@@ -12,6 +12,7 @@ import Camera from './Camera';
 import Atmosphere from '../Globe/Atmosphere';
 import Capabilities from '../Core/System/Capabilities';
 import RendererConstant from './RendererConstant';
+import { ellipsoidSizes } from '../Core/Geographic/Coordinates';
 
 var instance3DEngine = null;
 
@@ -103,7 +104,8 @@ function c3DEngine(scene, controlOptions, viewerDiv, debugMode, gLDebug) {
     }.bind(this);
 
     this.scene = scene;
-    this.size = this.scene.size().x;
+    // TODO: remove globe dependency
+    this.size = ellipsoidSizes().x;
 
     //
     // init camera
@@ -229,7 +231,9 @@ c3DEngine.prototype.changeStateNodesScene = function changeStateNodesScene(state
     // build traverse function
     var changeStateFunction = (function getChangeStateFunctionFn() {
         return function changeStateFunction(object3D) {
-            object3D.changeState(state);
+            if (object3D.changeState) {
+                object3D.changeState(state);
+            }
         };
     }());
 
