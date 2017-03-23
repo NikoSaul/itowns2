@@ -10,7 +10,7 @@ and open the template in the editor.
 
     <style type="text/css">
             html {height: 100%}
-        body { margin: 0; overflow:hidden; height:100%}
+            body { margin: 0; overflow:hidden; height:100%}
 
             #viewerDiv {
                 margin : auto auto;
@@ -22,6 +22,36 @@ and open the template in the editor.
             }
             #menuDiv {position: absolute; top:0px; margin-left: 0px;}
 
+            .couponcode:hover .coupontooltip {
+                display: block;
+            }
+
+            .coupontooltip {
+                display: none;
+                background-image: linear-gradient(rgba(231, 185, 27,0.95), rgba(200, 155, 0,0.95));
+                box-shadow: -1px 2px 5px 1px rgba(0, 0, 0, 0.5);
+                margin-bottom: 20px;
+                margin-right: 20px;
+                padding: 10px;
+                position: absolute;
+                z-index: 1000;
+                width:200px;
+                height:20px;
+                color: #3A2E30;
+                font-family: 'Open Sans',
+                sans-serif;
+                font-size: 14px;
+                font-weight: 300;
+                line-height: 20px;
+                text-align: left;
+                right: 0;
+                bottom: 0;
+            }
+
+            .couponcode {
+                margin:100px;
+            }
+
 
         </style>
         <meta charset="UTF-8">
@@ -30,7 +60,9 @@ and open the template in the editor.
         <script src="node_modules/dat.gui/build/dat.gui.min.js"></script>
     </head>
     <body>
-        <div id="viewerDiv"></div>
+        <div id="viewerDiv" class="couponcode">
+            <span class="coupontooltip"> Scale </span>
+        </div>
         <script src="examples/GUI/GuiTools.js"></script>
         <script src="dist/itowns.js"></script>
         <script src="dist/debug.js"></script>
@@ -55,9 +87,9 @@ and open the template in the editor.
             const urlElevationLayers = [];
 
             urlImageryLayers.push('examples/layers/JSONLayers/Ortho.json');
-            urlImageryLayers.push('examples/layers/JSONLayers/OrthosCRS.json');
-            urlImageryLayers.push('examples/layers/JSONLayers/ScanEX.json');
-            urlImageryLayers.push('examples/layers/JSONLayers/Region.json');
+            // urlImageryLayers.push('examples/layers/JSONLayers/OrthosCRS.json');
+            // urlImageryLayers.push('examples/layers/JSONLayers/ScanEX.json');
+            // urlImageryLayers.push('examples/layers/JSONLayers/Region.json');
 
             urlElevationLayers.push('examples/layers/JSONLayers/IGN_MNT.json');
             urlElevationLayers.push('examples/layers/JSONLayers/IGN_MNT_HIGHRES.json');
@@ -74,11 +106,36 @@ and open the template in the editor.
             menuGlobe.addGUI('RealisticLighting', false,
                 (newValue) => { itowns.viewer.setRealisticLightingOn(newValue); });
 
+            const scale = document.querySelectorAll('.coupontooltip')[0];
+
+            const fn = function fn() {
+                const pitch = 0.28;
+                const size = 200 * pitch;
+                const scaled = itowns.viewer.getZoomScale();
+                let mm = size / scaled / 1000;
+                mm = Math.floor(mm);
+                const digit = Math.pow(10, mm.toString().length - 1);
+                const mmr = Math.round(mm / digit) * digit;
+                const pix = Math.floor(mmr * scaled / pitch * 1000);
+                if (mmr > 1000) {
+                    scale.innerHTML = `${Math.floor(mmr / 1000)} km`;
+                } else {
+                    scale.innerHTML = `${mmr} m`;
+                }
+
+                scale.style.width = `${pix}px`;
+            };
+
             itowns.viewer.addEventListener(itowns.INITIALIZED_EVENT, () => {
                 // eslint-disable-next-line no-console
                 console.info('Globe initialized');
+                // line.style.width = '50px';
+                fn();
+                itowns.viewer.scene.gfxEngine.renderer.domElement.addEventListener('rangeChanged', () => {
+                    // eslint-disable-next-line no-console
+                    fn();
+                });
             });
-
 </script>
     </body>
 </html>
