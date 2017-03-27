@@ -56,9 +56,27 @@ function c3DEngine(scene, controlOptions, viewerDiv, debugMode, gLDebug) {
         this.renderer.setViewport(0, 0, this.width, this.height);
         this.renderer.render(this.scene3D, this.camera.camera3D);
 
+
+        const sizeMiniGlobe = 150;
+        this.renderer.clearDepth();
+        this.enableLevel(true);
+        const distanceCamera = this.camera.camera3D.position.length();
+        const distance = Math.min(this.cloneCamera.maxDistance, distanceCamera * 1.5);
+        this.cloneCamera.position.copy(this.controls.moveTarget()).setLength(distance);
+        this.cloneCamera.lookAt(this.controls.moveTarget());
+        this.cloneCamera.up.copy(new THREE.Vector3(0, 1, 0)).normalize();
+        this.cloneCamera.updateMatrix();
+        this.cloneCamera.updateMatrixWorld(true);
+        this.mesh.updateMatrix();
+        this.mesh.updateMatrixWorld(true);
+        this.renderer.setViewport(10, 10, sizeMiniGlobe, sizeMiniGlobe);
+        this.renderer.render(this.scene3D, this.cloneCamera);
+        this.enableLevel(false);
+
         if (this.debug) {
             this.enableRTC(false);
             this.camera.camHelper().visible = true;
+            this.camera.camHelper().updateMatrixWorld(true);
 
             var target = this.controls.moveTarget();
             var position = this.camera.position();
@@ -164,6 +182,28 @@ function c3DEngine(scene, controlOptions, viewerDiv, debugMode, gLDebug) {
     this.controls.maxDistance = this.size * 8.0;
     this.camera.update();
 
+    this.cloneCamera = this.camera.camera3D.clone();
+    this.cloneCamera.aspect = 1.0;
+    this.cloneCamera.updateProjectionMatrix();
+    this.cloneCamera.maxDistance = this.cloneCamera.position.length();
+
+    const ring = new THREE.RingGeometry(40, 37, 32);
+    const point = new THREE.CircleGeometry(2, 32);
+    const shadow = new THREE.CircleGeometry(5, 32);
+    const material = new THREE.MeshBasicMaterial({ color: 0xcccccc, side: THREE.DoubleSide, opacity: 0.8, transparent: true });
+    const shadowMesh = new THREE.Mesh(shadow, new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide, opacity: 0.5, transparent: true }));
+    this.mesh = new THREE.Mesh(ring, material);
+    this.mesh.add(new THREE.Mesh(point, new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, opacity: 0.85, transparent: true })));
+    this.mesh.add(shadowMesh);
+    this.cloneCamera.add(this.mesh);
+    this.mesh.position.set(0, 0, -500);
+    this.mesh.updateMatrix();
+    this.mesh.updateMatrixWorld(true);
+    shadowMesh.translateZ(-10);
+    this.mesh.updateMatrix();
+    this.mesh.updateMatrixWorld(true);
+    this.scene3D.add(this.cloneCamera);
+
     var gl = this.renderer.context;
     var maxTexturesUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
 
@@ -217,6 +257,36 @@ c3DEngine.prototype.enableRTC = function enableRTC(enable) {
             { node.visible = enable; }
         else if (node.enableRTC)
           { node.traverseVisible(enable ? this.rtcOn.bind(this) : this.rtcOff.bind(this)); }
+    }
+};
+
+c3DEngine.prototype.enableLevel = function enableLevel(enable) {
+    for (var x = 0; x < this.scene3D.children.length; x++) {
+        var node = this.scene3D.children[x];
+        node.traverse(enable ? this.levelOn.bind(this) : this.levelOff.bind(this));
+    }
+};
+
+c3DEngine.prototype.levelOn = function levelOn(obj3D) {
+    if (obj3D.level && obj3D.level < 4) {
+        obj3D.material.bvisible = obj3D.material.visible;
+        obj3D.bvisible = obj3D.visible;
+        obj3D.material.visible = obj3D.level === 2;
+        obj3D.visible = obj3D.level <= 2;
+        obj3D.enableRTC(false);
+        obj3D.matrixWorldNeedsUpdate = true;
+        obj3D.matrixAutoUpdate = true;
+    }
+};
+
+c3DEngine.prototype.levelOff = function levelOff(obj3D) {
+    if (obj3D.level && obj3D.level < 4) {
+        obj3D.material.visible = obj3D.material.bvisible === undefined ? obj3D.material.visible : obj3D.material.bvisible;
+        obj3D.visible = obj3D.bvisible === undefined ? obj3D.visible : obj3D.bvisible;
+        obj3D.material.bvisible = undefined;
+        obj3D.bvisible = undefined;
+        obj3D.enableRTC(true);
+        obj3D.matrixAutoUpdate = false;
     }
 };
 
