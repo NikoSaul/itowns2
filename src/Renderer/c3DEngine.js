@@ -58,7 +58,6 @@ function c3DEngine(scene, controlOptions, viewerDiv, debugMode, gLDebug) {
 
 
         const sizeMiniGlobe = 150;
-        this.renderer.clearDepth();
         this.enableLevel(true);
         const distanceCamera = this.camera.camera3D.position.length();
         const distance = Math.min(this.cloneCamera.maxDistance, distanceCamera * 1.5);
@@ -67,8 +66,15 @@ function c3DEngine(scene, controlOptions, viewerDiv, debugMode, gLDebug) {
         this.cloneCamera.up.copy(new THREE.Vector3(0, 1, 0)).normalize();
         this.cloneCamera.updateMatrix();
         this.cloneCamera.updateMatrixWorld(true);
-        this.mesh.updateMatrix();
-        this.mesh.updateMatrixWorld(true);
+        this.mesh.visible = false;
+        this.renderer.clearDepth();
+        this.renderer.setViewport(10, 10, sizeMiniGlobe, sizeMiniGlobe);
+        this.renderer.render(this.scene3D, this.cloneCamera);
+        this.mesh.visible = true;
+        this.cloneCamera.position.set(0, 0, 0);
+        this.cloneCamera.updateMatrix();
+        this.cloneCamera.updateMatrixWorld(true);
+        this.renderer.clearDepth();
         this.renderer.setViewport(10, 10, sizeMiniGlobe, sizeMiniGlobe);
         this.renderer.render(this.scene3D, this.cloneCamera);
         this.enableLevel(false);
