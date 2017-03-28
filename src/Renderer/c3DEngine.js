@@ -40,6 +40,19 @@ function c3DEngine(scene, controlOptions, viewerDiv, debugMode, gLDebug) {
 
     this.camera = new Camera(this.width, this.height, this.debug);
 
+    // var geometry = new THREE.RingGeometry(6600000, 6550000, 128);
+    // var material = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide });
+    // this.ring = new THREE.Object3D();
+    // const rr = new THREE.Mesh(geometry, material);
+    // this.rrr = rr.clone();
+    // this.rrr.rotateX(Math.PI * 0.75);
+    // this.ring.add(rr);
+    // this.ring.add(this.rrr);
+    // this.camera.camera3D.add(this.ring);
+    // this.ring.updateMatrix();
+    // this.ring.updateMatrixWorld(true);
+    // this.scene3D.add(this.camera.camera3D);
+
     if (this.debug) {
         this.camDebug = new THREE.PerspectiveCamera(30, this.camera.ratio);
     }
@@ -52,6 +65,11 @@ function c3DEngine(scene, controlOptions, viewerDiv, debugMode, gLDebug) {
         if (this.camera.camHelper())
             { this.camera.camHelper().visible = false; }
 
+        // this.ring.position.copy(this.camera.camera3D.worldToLocal(new THREE.Vector3()));
+        // this.rrr.rotateX(0.005);
+        // this.ring.updateMatrix();
+        // this.ring.updateMatrixWorld(true);
+
         this.renderer.clear();
         this.renderer.setViewport(0, 0, this.width, this.height);
         this.renderer.render(this.scene3D, this.camera.camera3D);
@@ -59,7 +77,8 @@ function c3DEngine(scene, controlOptions, viewerDiv, debugMode, gLDebug) {
         if (this.debug) {
             this.enableRTC(false);
             this.camera.camHelper().visible = true;
-
+            this.camera.camHelper().updateMatrixWorld(true);
+            // this.ring.visible = true;
             var target = this.controls.moveTarget();
             var position = this.camera.position();
             var posDebug = new THREE.Vector3().subVectors(position, target);
