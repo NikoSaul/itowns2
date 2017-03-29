@@ -13,7 +13,7 @@ import { CancelledCommandException } from '../Core/Commander/Scheduler';
 import { ellipsoidSizes } from '../Core/Geographic/Coordinates';
 import OGCWebServiceHelper from '../Core/Commander/Providers/OGCWebServiceHelper';
 
-export const SSE_SUBDIVISION_THRESHOLD = 6.0;
+export const SSE_SUBDIVISION_THRESHOLD = 1.0;
 
 function NodeProcess(scene) {
     // TODO: consider removing this.scene + replacing scene.notifyChange by an event

@@ -53,7 +53,6 @@ TileProvider.prototype.executeCommand = function executeCommand(command) {
 
     tile.setUuid(this.nNode++);
     tile.link = parent.link;
-    tile.geometricError = Math.pow(2, (18 - params.level));
 
     parent.worldToLocal(params.center);
 
