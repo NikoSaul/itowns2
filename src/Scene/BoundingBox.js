@@ -35,6 +35,39 @@ BoundingBox.prototype.as = function as(crs) {
         mi._values[2], ma._values[2]);
 };
 
+BoundingBox.prototype.set = function set(west, east, south, north, minAltitude, maxAltitude) {
+    const mi = this.minCoordinate;
+    const ma = this.maxCoordinate;
+
+    mi._values[0] = west;
+    ma._values[0] = east;
+    mi._values[1] = south;
+    ma._values[1] = north;
+    mi._values[2] = minAltitude;
+    ma._values[2] = maxAltitude;
+};
+
+BoundingBox.prototype.add = function add(bbox) {
+    const mi = this.minCoordinate;
+    const ma = this.maxCoordinate;
+
+    if (bbox.west() < this.west()) {
+        mi._values[0] = bbox.west();
+    }
+
+    if (bbox.east() > this.east()) {
+        ma._values[0] = bbox.east();
+    }
+
+    if (bbox.south() < this.south()) {
+        mi._values[1] = bbox.south();
+    }
+
+    if (bbox.north() > this.north()) {
+        ma._values[1] = bbox.north();
+    }
+};
+
 BoundingBox.prototype.west = function west(unit) {
     if (crsIsGeographic(this.crs())) {
         return this.minCoordinate.longitude(unit);
@@ -161,6 +194,7 @@ BoundingBox.prototype.setBBoxZ = function setBBoxZ(min, max) {
     this.minCoordinate._values[2] = min;
     this.maxCoordinate._values[2] = max;
 };
+
 
 /**
  * @documentation: Return true if this bounding box intersect with the bouding box parameter

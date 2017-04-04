@@ -5,6 +5,8 @@
  */
 
 import * as THREE from 'three';
+import BoundingBox from '../Scene/BoundingBox';
+import { UNIT } from '../Core/Geographic/Coordinates';
 
 function BrowseTree(engine) {
     // Constructor
@@ -17,6 +19,9 @@ function BrowseTree(engine) {
     this.mfogDistance = 1000000000.0;
     this.selectedNodeId = -1;
     this.selectedNode = null;
+    this.extent = new BoundingBox('EPSG:4326', 180, -180, 90, -90);
+    this.extent.minCoordinate._internalStorageUnit = UNIT.RADIAN;
+    this.extent.maxCoordinate._internalStorageUnit = UNIT.RADIAN;
 
     this.selectNode = function selectNode(node) {
         this._selectNode(node);
@@ -78,7 +83,7 @@ BrowseTree.prototype.browse = function browse(tree, camera, process, layersConfi
         tree: this.tree,
         layersConfig,
     };
-
+    this.extent.set(Math.PI, -Math.PI, Math.PI * 0.5, -Math.PI * 0.5);
     var rootNode = tree.children[0];
     applyFunctionToChildren(n => this._browseDisplayableNode(n, camera, process, params), rootNode);
 };
@@ -95,6 +100,7 @@ BrowseTree.prototype._browseDisplayableNode = function _browseDisplayableNode(no
     if (node.parent.isVisible() && process.processNode(node, camera, params)) {
         if (node.isDisplayed()) {
             this.uniformsProcess(node, camera);
+            this.extent.add(node.bbox);
             applyFunctionToChildren(n => this._browseNonDisplayableNode(n, node.level + 2, process, camera, params), node);
         } else {
             applyFunctionToChildren(n => this._browseDisplayableNode(n, camera, process, params), node);
