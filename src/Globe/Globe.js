@@ -13,8 +13,9 @@ import TileMesh from './TileMesh';
 import Atmosphere from './Atmosphere';
 import Clouds from './Clouds';
 import Capabilities from '../Core/System/Capabilities';
-import Coordinates, { UNIT } from '../Core/Geographic/Coordinates';
+import Coordinates, { UNIT, ellipsoidSizes } from '../Core/Geographic/Coordinates';
 import BasicMaterial from '../Renderer/BasicMaterial';
+import { SIZE_TEXTURE_TILE } from '../Core/Commander/Providers/OGCWebServiceHelper';
 import LayersConfiguration from '../Scene/LayersConfiguration';
 import { SSE_SUBDIVISION_THRESHOLD } from '../Scene/NodeProcess';
 import BoundingBox from '../Scene/BoundingBox';
@@ -202,24 +203,31 @@ Globe.prototype.removeColorLayer = function removeColorLayer(layer) {
     this.tiles.children[0].traverse(cO);
 };
 
-Globe.prototype.getZoomLevel = function getZoomLevel() {
-    var cO = (function getCOFn() {
-        var zoom = 0;
-        return function cO(object) {
-            if (object) {
-                zoom = Math.max(zoom, object.level);
-            }
-            return zoom;
-        };
-    }());
+Globe.prototype.computeTileZoomFromDistanceCamera = function computeTileZoomFromDistanceCamera(camera, distance) {
+    const sizeEllipsoid = ellipsoidSizes().x;
+    const preSinus = SIZE_TEXTURE_TILE * (SSE_SUBDIVISION_THRESHOLD * 0.5) / camera.preSSE / sizeEllipsoid;
 
-    this.tiles.children[0].traverseVisible(cO);
-    return cO();
+    let sinus = distance * preSinus;
+    let zoom = Math.log(Math.PI / (2.0 * Math.asin(sinus))) / Math.log(2);
+
+    const delta = Math.PI / Math.pow(2, zoom);
+    const circleChord = 2.0 * sizeEllipsoid * Math.sin(delta * 0.5);
+    const radius = circleChord * 0.5;
+
+    // adjust with bounding sphere rayon
+    sinus = (distance - radius) * preSinus;
+    zoom = Math.log(Math.PI / (2.0 * Math.asin(sinus))) / Math.log(2);
+
+    return isNaN(zoom) ? 0 : Math.round(zoom);
 };
 
+Globe.prototype.computeDistanceCameraFromTileZoom = function computeDistanceCameraFromTileZoom(camera, zoom) {
+    const delta = Math.PI / Math.pow(2, zoom);
+    const circleChord = 2.0 * ellipsoidSizes().x * Math.sin(delta * 0.5);
+    const radius = circleChord * 0.5;
+    const error = radius / SIZE_TEXTURE_TILE;
 
-Globe.prototype.computeDistanceForZoomLevel = function computeDistanceForZoomLevel(zoom, camera) {
-    return camera.preSSE * Math.pow(this.tiles.minLevel, (this.tiles.maxLevel - zoom + 1)) / SSE_SUBDIVISION_THRESHOLD;
+    return camera.preSSE * error / (SSE_SUBDIVISION_THRESHOLD * 0.5) + radius;
 };
 
 Globe.prototype.getTile = function getTile(coordinate) {
