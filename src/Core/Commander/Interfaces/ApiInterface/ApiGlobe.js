@@ -23,13 +23,6 @@ var status = function status() {
 var sceneIsLoaded = false;
 export const INITIALIZED_EVENT = 'initialized';
 
-var eventLayerAdded = new CustomEvent('layeradded');
-var eventLayerRemoved = new CustomEvent('layerremoved');
-var eventLayerChanged = new CustomEvent('layerchanged');
-var eventLayerChangedVisible = new CustomEvent('layerchanged:visible');
-var eventLayerChangedOpacity = new CustomEvent('layerchanged:opacity');
-var eventLayerChangedIndex = new CustomEvent('layerchanged:index');
-
 var eventZoom = new CustomEvent('zoomchanged', {
     detail: new status(),
 });
@@ -99,7 +92,6 @@ ApiGlobe.prototype.addGeometryLayer = function addGeometryLayer(layer) {
         console.error(`Error : id "${layer.id}" already exist, WARNING your layer isn't added`);
     } else {
         map.layersConfiguration.addGeometryLayer(layer);
-        this.viewerDiv.dispatchEvent(eventLayerAdded);
     }
 };
 
@@ -160,9 +152,6 @@ ApiGlobe.prototype.addImageryLayer = function addImageryLayer(layer) {
     } else {
         this.scene.getMap().layersConfiguration.addColorLayer(layer);
         this.scene.notifyChange(1, true);
-        this.setSceneLoaded().then(() => {
-            this.viewerDiv.dispatchEvent(eventLayerAdded);
-        });
     }
 };
 
@@ -218,9 +207,6 @@ ApiGlobe.prototype.moveLayerToIndex = function moveLayerToIndex(layerId, newInde
     this.scene.getMap().layersConfiguration.moveLayerToIndex(layerId, newIndex);
     this.scene.getMap().updateLayersOrdering();
     this.scene.renderScene3D();
-    eventLayerChangedIndex.layerIndex = newIndex;
-    eventLayerChangedIndex.layerId = layerId;
-    this.viewerDiv.dispatchEvent(eventLayerChangedIndex);
 };
 
 /**
@@ -233,8 +219,6 @@ ApiGlobe.prototype.removeImageryLayer = function removeImageryLayer(id) {
     if (this.scene.getMap().layersConfiguration.removeColorLayer(id)) {
         this.scene.getMap().removeColorLayer(id);
         this.scene.renderScene3D();
-        eventLayerRemoved.layer = id;
-        this.viewerDiv.dispatchEvent(eventLayerRemoved);
         return true;
     }
 
@@ -263,9 +247,6 @@ ApiGlobe.prototype.addElevationLayer = function addElevationLayer(layer) {
     } else {
         this.scene.getMap().layersConfiguration.addElevationLayer(layer);
         this.scene.notifyChange(1, true);
-        this.setSceneLoaded().then(() => {
-            this.viewerDiv.dispatchEvent(eventLayerAdded);
-        });
     }
 };
 
@@ -471,9 +452,6 @@ ApiGlobe.prototype.setRealisticLightingOn = function setRealisticLightingOn(valu
 ApiGlobe.prototype.setLayerVisibility = function setLayerVisibility(id, visible) {
     this.scene.getMap().setLayerVisibility(id, visible);
     this.update();
-    eventLayerChangedVisible.layerId = id;
-    eventLayerChangedVisible.visible = visible;
-    this.viewerDiv.dispatchEvent(eventLayerChangedVisible);
 };
 
 /**
@@ -486,9 +464,6 @@ ApiGlobe.prototype.setLayerVisibility = function setLayerVisibility(id, visible)
 ApiGlobe.prototype.setLayerOpacity = function setLayerOpacity(id, opacity) {
     this.scene.getMap().setLayerOpacity(id, opacity);
     this.scene.renderScene3D();
-    eventLayerChangedOpacity.layerId = id;
-    eventLayerChangedOpacity.opacity = opacity;
-    this.viewerDiv.dispatchEvent(eventLayerChangedOpacity);
 };
 
 /**
@@ -937,26 +912,13 @@ ApiGlobe.prototype.getRangeFromScale = function getRangeFromScale(zoomScale, pit
  */
 
 ApiGlobe.prototype.addEventListener = function addEventListenerProto(eventname, callback) {
-    if (eventname == 'layerchanged') {
-        this.viewerDiv.addEventListener('layerchanged', callback, false);
-        this.addEventListenerLayerChanged();
-    } else if (eventname == 'zoomchanged') {
+    if (eventname == 'zoomchanged') {
         _handlerZoom = this.callbackZoomChanged.bind(this);
         this.viewerDiv.addEventListener('zoomchanged', callback, false);
         this.addEventListenerZoomChanged();
     } else {
         this.viewerDiv.addEventListener(eventname, callback, false);
     }
-};
-
-ApiGlobe.prototype.addEventListenerLayerChanged = function addEventListenerLayerChanged() {
-    this.viewerDiv.addEventListener('layerchanged:visible', this.callbackLayerChanged, false);
-    this.viewerDiv.addEventListener('layerchanged:opacity', this.callbackLayerChanged, false);
-    this.viewerDiv.addEventListener('layerchanged:index', this.callbackLayerChanged, false);
-};
-
-ApiGlobe.prototype.callbackLayerChanged = function callbackLayerChanged() {
-    this.dispatchEvent(eventLayerChanged);
 };
 
 ApiGlobe.prototype.addEventListenerZoomChanged = function addEventListenerZoomChanged() {
@@ -978,10 +940,7 @@ ApiGlobe.prototype.callbackZoomChanged = function callbackZoomChanged() {
  */
 
 ApiGlobe.prototype.removeEventListener = function removeEventListenerProto(eventname, callback) {
-    if (eventname == 'layerchanged') {
-        this.viewerDiv.removeEventListener('layerchanged', callback, false);
-        this.removeEventListenerLayerChanged();
-    } else if (eventname == 'zoomchanged') {
+    if (eventname == 'zoomchanged') {
         this.viewerDiv.removeEventListener('zoomchanged', callback, false);
         this.removeEventListenerZoomChanged();
     } else {
