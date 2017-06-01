@@ -119,4 +119,5 @@ Camera.prototype.isSphereVisible = function isSphereVisible(sphere, matrixWorld)
     return frustum.intersectsSphere(sphere);
 };
 
+
 export default Camera;

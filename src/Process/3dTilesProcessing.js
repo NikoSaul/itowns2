@@ -46,6 +46,28 @@ function subdivideNode(context, layer, node) {
 }
 
 export function $3dTilesCulling(node, camera) {
+    // For viewer Request Volume https://github.com/AnalyticalGraphicsInc/3d-tiles-samples/tree/master/tilesets/TilesetWithRequestVolume
+    if (node.viewerRequestVolume) {
+        const nodeViewer = node.viewerRequestVolume;
+        if (nodeViewer.region) {
+            // TODO
+            return true;
+        }
+        if (nodeViewer.box) {
+            // TODO
+            return true;
+        }
+        if (nodeViewer.sphere) {
+            const worldCoordinateCenter = nodeViewer.sphere.center.clone();
+            worldCoordinateCenter.applyMatrix4(node.matrixWorld);
+            // To check the distance between the sphere and the camera
+            const distance = Math.max(0.0, camera.camera3D.position.distanceTo(worldCoordinateCenter) - nodeViewer.sphere.radius);
+            if (!(distance <= nodeViewer.sphere.radius)) {
+                return true;
+            }
+        }
+    }
+
     // For bounding volume
     if (node.boundingVolume) {
         const boundingVolume = node.boundingVolume;
