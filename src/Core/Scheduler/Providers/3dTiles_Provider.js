@@ -3,6 +3,8 @@ import Provider from './Provider';
 import B3dmLoader from '../../../Renderer/ThreeExtended/B3dmLoader';
 import Fetcher from './Fetcher';
 import BasicMaterial from '../../../Renderer/BasicMaterial';
+import OBB from '../../../Renderer/ThreeExtended/OBB';
+import Extent from '../../Geographic/Extent';
 
 
 export function $3dTilesIndex(tileset, urlPrefix) {
@@ -48,8 +50,14 @@ $3dTiles_Provider.prototype.preprocessDataLayer = function preprocessDataLayer(/
 
 function getBox(boundingVolume) {
     if (boundingVolume.region) {
-        throw new Error('Region bounding volume not supported yet');
-        // return { region: boundingVolume.region };
+        const region = boundingVolume.region;
+        const radToDeg = 180 / Math.PI;
+        const extent = new Extent('EPSG:4326', region[0] * radToDeg, region[2] * radToDeg, region[1] * radToDeg, region[3] * radToDeg);
+        const box = OBB.extentToOBB(extent, region[4], region[5]);
+        box.position.copy(box.centerWorld);
+        box.updateMatrix();
+        box.updateMatrixWorld();
+        return { region: box };
     } else if (boundingVolume.box) {
         // TODO: only works for axis aligned boxes
         const box = boundingVolume.box;
@@ -67,8 +75,8 @@ function getBox(boundingVolume) {
 
         return { box: new THREE.Box3(new THREE.Vector3(w, s, b), new THREE.Vector3(e, n, t)) };
     } else if (boundingVolume.sphere) {
-        throw new Error('Sphere bounding volume not supported yet');
-        // return { sphere: undefined };
+        const sphere = new THREE.Sphere(new THREE.Vector3(boundingVolume.sphere[0], boundingVolume.sphere[1], boundingVolume.sphere[2]), boundingVolume.sphere[3]);
+        return { sphere };
     }
 }
 
