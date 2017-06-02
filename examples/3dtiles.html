@@ -58,7 +58,7 @@
                 if (node.visible) {
                     if (n.length == 0) {
                       if (node.boundingVolume.region) {
-                        n = new itowns.OBBHelper(node.boundingVolume.region, '');
+                        n = new debug.OBBHelper(node.boundingVolume.region, '');
                         node.add(n);
                         n.layer = debug3dt.id;
                         n.layers.set(layer.threejsLayer);

@@ -8,7 +8,6 @@ import PlanarView from './Core/Prefab/PlanarView';
 import Extent from './Core/Geographic/Extent';
 import Coordinates from './Core/Geographic/Coordinates';
 import Fetcher from './Core/Scheduler/Providers/Fetcher';
-import OBBHelper from '../utils/debug/OBBHelper';
 
 // Then exported as non-default here.
 export { GLOBE_VIEW_EVENTS, CONTROL_EVENTS };
@@ -19,7 +18,7 @@ export { PlanarView };
 export { Extent };
 export { Coordinates };
 export { Fetcher };
-export { OBBHelper };
+
 
 // Others can be directly exported
 export { UNIT } from './Core/Geographic/Coordinates';
