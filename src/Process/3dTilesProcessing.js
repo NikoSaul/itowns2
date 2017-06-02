@@ -60,9 +60,8 @@ export function $3dTilesCulling(node, camera) {
         if (nodeViewer.sphere) {
             const worldCoordinateCenter = nodeViewer.sphere.center.clone();
             worldCoordinateCenter.applyMatrix4(node.matrixWorld);
-            // To check the distance between the sphere and the camera
-            const distance = Math.max(0.0, camera.camera3D.position.distanceTo(worldCoordinateCenter) - nodeViewer.sphere.radius);
-            if (!(distance <= nodeViewer.sphere.radius)) {
+            // To check the distance between the center sphere and the camera
+            if (!(camera.camera3D.position.distanceTo(worldCoordinateCenter) <= nodeViewer.sphere.radius)) {
                 return true;
             }
         }
