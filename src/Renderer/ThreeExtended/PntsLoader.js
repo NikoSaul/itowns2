@@ -1,11 +1,59 @@
 import * as THREE from 'three';
 
-function PntsLoader() {
-}
+export default {
+    parse: function parse(buffer, layer) {
+        if (!buffer) {
+            throw new Error('No array buffer provided.');
+        }
 
-/*
-    Parse the feature table
-*/
+        const array = new Uint8Array(buffer);
+        const view = new DataView(buffer);
+
+        let byteOffset = 0;
+        const pntsHeader = {};
+
+        // Magic type is unsigned char [4]
+        pntsHeader.magic = decodeFromCharCode(array.subarray(byteOffset, 4));
+        byteOffset += 4;
+
+        if (pntsHeader.magic) {
+            // Version, byteLength, batchTableJSONByteLength, batchTableBinaryByteLength and batchTable types are uint32
+            pntsHeader.version = view.getUint32(byteOffset, true);
+            byteOffset += Uint32Array.BYTES_PER_ELEMENT;
+
+            pntsHeader.byteLength = view.getUint32(byteOffset, true);
+            byteOffset += Uint32Array.BYTES_PER_ELEMENT;
+
+            pntsHeader.FTJSONLength = view.getUint32(byteOffset, true);
+            byteOffset += Uint32Array.BYTES_PER_ELEMENT;
+
+            pntsHeader.FTBinaryLength = view.getUint32(byteOffset, true);
+            byteOffset += Uint32Array.BYTES_PER_ELEMENT;
+
+            pntsHeader.BTJSONLength = view.getUint32(byteOffset, true);
+            byteOffset += Uint32Array.BYTES_PER_ELEMENT;
+
+            pntsHeader.BTBinaryLength = view.getUint32(byteOffset, true);
+            byteOffset += Uint32Array.BYTES_PER_ELEMENT;
+
+            // binary table
+            if (pntsHeader.FTBinaryLength > 0) {
+                // readTestFT(array, byteOffset, pntsHeader.FTJSONLength);
+                return parseFeatureBinary(array, byteOffset, pntsHeader.FTJSONLength, buffer, layer);
+            }
+
+            // batch table
+          /*
+            if (pntsHeader.BTBinaryLength > 0) {
+                console.log('BTB');
+            }
+            */
+        } else {
+            throw new Error('Invalid pnts file.');
+        }
+    },
+};
+
 function parseFeatureBinary(array, byteOffset, FTJSONLength, buffer, layer) {
     const subArrayJson = decodeFromCharCode(array.subarray(byteOffset, FTJSONLength + byteOffset));
     const parseJSON = JSON.parse(subArrayJson);
@@ -63,57 +111,3 @@ function decodeFromCharCode(value) {
     }
     return result;
 }
-
-PntsLoader.prototype.parse = function parse(buffer, layer) {
-    if (!buffer) {
-        throw new Error('No array buffer provided.');
-    }
-
-    const array = new Uint8Array(buffer);
-    const view = new DataView(buffer);
-
-    let byteOffset = 0;
-    const pntsHeader = {};
-
-    // Magic type is unsigned char [4]
-    pntsHeader.magic = decodeFromCharCode(array.subarray(byteOffset, 4));
-    byteOffset += 4;
-
-    if (pntsHeader.magic) {
-        // Version, byteLength, batchTableJSONByteLength, batchTableBinaryByteLength and batchTable types are uint32
-        pntsHeader.version = view.getUint32(byteOffset, true);
-        byteOffset += Uint32Array.BYTES_PER_ELEMENT;
-
-        pntsHeader.byteLength = view.getUint32(byteOffset, true);
-        byteOffset += Uint32Array.BYTES_PER_ELEMENT;
-
-        pntsHeader.FTJSONLength = view.getUint32(byteOffset, true);
-        byteOffset += Uint32Array.BYTES_PER_ELEMENT;
-
-        pntsHeader.FTBinaryLength = view.getUint32(byteOffset, true);
-        byteOffset += Uint32Array.BYTES_PER_ELEMENT;
-
-        pntsHeader.BTJSONLength = view.getUint32(byteOffset, true);
-        byteOffset += Uint32Array.BYTES_PER_ELEMENT;
-
-        pntsHeader.BTBinaryLength = view.getUint32(byteOffset, true);
-        byteOffset += Uint32Array.BYTES_PER_ELEMENT;
-
-        // binary table
-        if (pntsHeader.FTBinaryLength > 0) {
-            // readTestFT(array, byteOffset, pntsHeader.FTJSONLength);
-            return parseFeatureBinary(array, byteOffset, pntsHeader.FTJSONLength, buffer, layer);
-        }
-
-        // batch table
-      /*
-        if (pntsHeader.BTBinaryLength > 0) {
-            console.log('BTB');
-        }
-        */
-    } else {
-        throw new Error('Invalid pnts file.');
-    }
-};
-
-export default PntsLoader;

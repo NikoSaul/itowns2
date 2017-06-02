@@ -35,7 +35,7 @@ function $3dTiles_Provider(/* options*/) {
 
     Provider.call(this);
     this.b3dmLoader = new B3dmLoader();
-    this.pntsLoader = new PntsLoader();
+    this.pntsLoader = PntsLoader;
 }
 
 $3dTiles_Provider.prototype = Object.create(Provider.prototype);
