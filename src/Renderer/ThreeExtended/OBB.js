@@ -100,6 +100,9 @@ OBB.prototype._cPointsWorld = function _cPointsWorld(points) {
 
 // get oriented bounding box of tile
 OBB.extentToOBB = function extentToOBB(extent, minHeight = 0, maxHeight = 0) {
+    if (extent._crs != 'EPSG:4326') {
+        throw new Error('The extent crs is not a Geographic Coordinates (EPSG:4326)');
+    }
     const cardinals = [];
     // Calcule the center world position with the extent.
     const centerWorld = extent.center().as('EPSG:4978').xyz();

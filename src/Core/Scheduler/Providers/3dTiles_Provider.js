@@ -6,6 +6,7 @@ import Fetcher from './Fetcher';
 import BasicMaterial from '../../../Renderer/BasicMaterial';
 import OBB from '../../../Renderer/ThreeExtended/OBB';
 import Extent from '../../Geographic/Extent';
+import MathExtended from '../../Math/MathExtended';
 
 
 export function $3dTilesIndex(tileset, urlPrefix) {
@@ -50,19 +51,18 @@ $3dTiles_Provider.prototype.preprocessDataLayer = function preprocessDataLayer(/
 
 };
 
-function getBox(boundingVolume) {
-    if (boundingVolume.region) {
-        const region = boundingVolume.region;
-        const radToDeg = 180 / Math.PI;
-        const extent = new Extent('EPSG:4326', region[0] * radToDeg, region[2] * radToDeg, region[1] * radToDeg, region[3] * radToDeg);
+function getBox(volume) {
+    if (volume.region) {
+        const region = volume.region;
+        const extent = new Extent('EPSG:4326', MathExtended.radToDeg(region[0]), MathExtended.radToDeg(region[2]), MathExtended.radToDeg(region[1]), MathExtended.radToDeg(region[3]));
         const box = OBB.extentToOBB(extent, region[4], region[5]);
         box.position.copy(box.centerWorld);
         box.updateMatrix();
         box.updateMatrixWorld();
         return { region: box };
-    } else if (boundingVolume.box) {
+    } else if (volume.box) {
         // TODO: only works for axis aligned boxes
-        const box = boundingVolume.box;
+        const box = volume.box;
         // box[0], box[1], box[2] = center of the box
         // box[3], box[4], box[5] = x axis direction and half-length
         // box[6], box[7], box[8] = y axis direction and half-length
@@ -76,8 +76,8 @@ function getBox(boundingVolume) {
         const t = center.z + box[11];
 
         return { box: new THREE.Box3(new THREE.Vector3(w, s, b), new THREE.Vector3(e, n, t)) };
-    } else if (boundingVolume.sphere) {
-        const sphere = new THREE.Sphere(new THREE.Vector3(boundingVolume.sphere[0], boundingVolume.sphere[1], boundingVolume.sphere[2]), boundingVolume.sphere[3]);
+    } else if (volume.sphere) {
+        const sphere = new THREE.Sphere(new THREE.Vector3(volume.sphere[0], volume.sphere[1], volume.sphere[2]), volume.sphere[3]);
         return { sphere };
     }
 }

@@ -110,7 +110,7 @@ function computeNodeSSE(camera, node) {
         const distance = camera.camera3D.position.distanceTo(worldCoordinateCenter);
         return preSSE * (node.geometricError / distance);
     } else if (node.boundingVolume.sphere) {
-        const worldCoordinateCenter = node.boundingVolume.sphere.center;
+        const worldCoordinateCenter = node.boundingVolume.sphere.center.clone();
         worldCoordinateCenter.applyMatrix4(node.matrixWorld);
         const distance = Math.max(
             0.0,
