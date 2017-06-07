@@ -36,7 +36,6 @@ function $3dTiles_Provider(/* options*/) {
 
     Provider.call(this);
     this.b3dmLoader = new B3dmLoader();
-    this.pntsLoader = PntsLoader;
 }
 
 $3dTiles_Provider.prototype = Object.create(Provider.prototype);
@@ -96,9 +95,9 @@ $3dTiles_Provider.prototype.b3dmToMesh = function b3dmToMesh(data, layer) {
     });
 };
 
-$3dTiles_Provider.prototype.pntsParse = function pntsParse(data, layer) {
+$3dTiles_Provider.prototype.pntsParse = function pntsParse(data) {
     return new Promise((resolve) => {
-        resolve(this.pntsLoader.parse(data, layer));
+        resolve(PntsLoader.parse(data));
     });
 };
 

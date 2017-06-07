@@ -80,7 +80,7 @@ Camera.prototype.setRotation = function setRotation(rotation) {
 const temp = new THREE.Vector3();
 const frustum = new THREE.Frustum();
 const localViewMatrix = new THREE.Matrix4();
-function localTranslationFrutum(matrixWorld, camera) {
+function localTranslationFrustum(matrixWorld, camera) {
     temp.setFromMatrixPosition(matrixWorld);
     matrixWorld.elements[12] -= camera._visibilityTestingOffset.x;
     matrixWorld.elements[13] -= camera._visibilityTestingOffset.y;
@@ -94,10 +94,10 @@ function localTranslationFrutum(matrixWorld, camera) {
 }
 
 Camera.prototype.isBox3DVisible = function isBox3DVisible(box3d, matrixWorld) {
-    return localTranslationFrutum(matrixWorld, this).intersectsBox(box3d);
+    return localTranslationFrustum(matrixWorld, this).intersectsBox(box3d);
 };
 Camera.prototype.isSphereVisible = function isSphereVisible(sphere, matrixWorld) {
-    return localTranslationFrutum(matrixWorld, this).intersectsSphere(sphere);
+    return localTranslationFrustum(matrixWorld, this).intersectsSphere(sphere);
 };
 
 Camera.prototype.box3DSizeOnScreen = function box3DSizeOnScreen(box3d, matrixWorld) {
