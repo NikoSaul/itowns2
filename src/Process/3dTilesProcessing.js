@@ -46,6 +46,7 @@ function subdivideNode(context, layer, node) {
 }
 
 export function $3dTilesCulling(node, camera) {
+    return false;
     // For viewer Request Volume https://github.com/AnalyticalGraphicsInc/3d-tiles-samples/tree/master/tilesets/TilesetWithRequestVolume
     if (node.viewerRequestVolume) {
         const nodeViewer = node.viewerRequestVolume;

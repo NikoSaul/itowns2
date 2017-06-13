@@ -63,6 +63,9 @@ function parseFeatureBinary(array, byteOffset, FTJSONLength, view) {
     if (parseJSON.POINTS_LENGTH) {
         lengthFeature = parseJSON.POINTS_LENGTH;
     }
+    if (parseJSON.RTC_CENTER) {
+        geometry.RTC_CENTER = parseJSON.RTC_CENTER;
+    }
     if (parseJSON.POSITION) {
         const byteOffsetPos = (parseJSON.POSITION.byteOffset + subArrayJson.length + byteOffset);
         const positionArray = new Float32Array(view, byteOffsetPos, lengthFeature * 3);

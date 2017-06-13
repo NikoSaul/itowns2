@@ -128,7 +128,10 @@ $3dTiles_Provider.prototype.executeCommand = function executeCommand(command) {
         obj.layers.set(layer.threejsLayer);
     };
     if (urlSuffix) {
-        const url = metadata.urlPrefix + urlSuffix;
+        let url = metadata.urlPrefix + urlSuffix;
+        if (urlSuffix.substring(0, 4) == 'http') {
+            url = urlSuffix;
+        }
 
         const supportedFormats = {
             b3dm: this.b3dmToMesh.bind(this),
@@ -155,6 +158,17 @@ $3dTiles_Provider.prototype.executeCommand = function executeCommand(command) {
                     return func(result, layer).then((content) => {
                         tile.add(content);
                         tile.traverse(setLayer);
+                        if (tile.children[0]) {
+                            if (tile.children[0].geometry) {
+                                if (tile.children[0].geometry.RTC_CENTER) {
+                                    console.log(tile);
+                                    const rtc_center = tile.children[0].geometry.RTC_CENTER;
+                                    tile.modelViewMatrix.elements[12] = rtc_center[0];
+                                    tile.modelViewMatrix.elements[13] = rtc_center[1];
+                                    tile.modelViewMatrix.elements[14] = rtc_center[2];
+                                }
+                            }
+                        }
                         return tile;
                     });
                 }
