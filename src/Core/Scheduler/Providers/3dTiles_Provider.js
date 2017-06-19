@@ -137,7 +137,6 @@ $3dTiles_Provider.prototype.executeCommand = function executeCommand(command) {
             b3dm: this.b3dmToMesh.bind(this),
             pnts: this.pntsParse.bind(this),
         };
-
         return Fetcher.arrayBuffer(url).then((result) => {
             if (result !== undefined) {
                 let func;
@@ -157,18 +156,13 @@ $3dTiles_Provider.prototype.executeCommand = function executeCommand(command) {
                     // TODO: request should be delayed if there is a viewerRequestVolume
                     return func(result, layer).then((content) => {
                         tile.add(content);
-                        tile.traverse(setLayer);
-                        if (tile.children[0]) {
-                            if (tile.children[0].geometry) {
-                                if (tile.children[0].geometry.RTC_CENTER) {
-                                    console.log(tile);
-                                    const rtc_center = tile.children[0].geometry.RTC_CENTER;
-                                    tile.modelViewMatrix.elements[12] = rtc_center[0];
-                                    tile.modelViewMatrix.elements[13] = rtc_center[1];
-                                    tile.modelViewMatrix.elements[14] = rtc_center[2];
-                                }
-                            }
+                        if (content.RTC) {
+                            var rtc = new THREE.Object3D();
+                            rtc.position.set(content.RTC[0], content.RTC[1], content.RTC[2]);
+                            rtc.add(content);
+                            tile.add(rtc);
                         }
+                        tile.traverse(setLayer);
                         return tile;
                     });
                 }

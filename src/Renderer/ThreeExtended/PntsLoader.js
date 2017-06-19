@@ -64,7 +64,7 @@ function parseFeatureBinary(array, byteOffset, FTJSONLength, view) {
         lengthFeature = parseJSON.POINTS_LENGTH;
     }
     if (parseJSON.RTC_CENTER) {
-        geometry.RTC_CENTER = parseJSON.RTC_CENTER;
+        geometry.RTC = parseJSON.RTC_CENTER;
     }
     if (parseJSON.POSITION) {
         const byteOffsetPos = (parseJSON.POSITION.byteOffset + subArrayJson.length + byteOffset);
@@ -97,5 +97,6 @@ function parseFeatureBinary(array, byteOffset, FTJSONLength, view) {
     // creation points with geometry and material
     const points = new THREE.Points(geometry, material);
     points.realPointCount = lengthFeature;
+    points.RTC = geometry.RTC;
     return points;
 }

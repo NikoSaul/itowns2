@@ -46,7 +46,6 @@ function subdivideNode(context, layer, node) {
 }
 
 export function $3dTilesCulling(node, camera) {
-    return false;
     // For viewer Request Volume https://github.com/AnalyticalGraphicsInc/3d-tiles-samples/tree/master/tilesets/TilesetWithRequestVolume
     if (node.viewerRequestVolume) {
         const nodeViewer = node.viewerRequestVolume;
@@ -164,7 +163,6 @@ export function process3dTilesNode(cullingTest, subdivisionTest) {
         node.visible = isVisible;
 
         let returnValue;
-
         if (isVisible) {
             if (node.pendingSubdivision || subdivisionTest(context, layer, node)) {
                 subdivideNode(context, layer, node);
@@ -180,6 +178,11 @@ export function process3dTilesNode(cullingTest, subdivisionTest) {
             if ((node.material === undefined || node.material.visible) && !node.additiveRefinement) {
                 for (const n of node.children.filter(n => n.layer == layer.id)) {
                     n.visible = false;
+                    /*
+                    n.children[0].matrixWorld.elements[12] = n.children[0].RTC[0];
+                    n.children[0].matrixWorld.elements[13] = n.children[0].RTC[1];
+                    n.children[0].matrixWorld.elements[14] = n.children[0].RTC[2];
+                    */
                     if (n.material) {
                         n.material.visible = false;
                     }

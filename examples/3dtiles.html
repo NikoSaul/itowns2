@@ -82,87 +82,32 @@
                     n[0].visible = false;
                 }
             }
+            // Create a new Layer 3d-tiles For Zanzibar
+            // ------------------------------------------------------
+            const $3dTilesLayerRequestVolumeZanzibar = new itowns.GeometryLayer('3d-tiles');
 
-            // Create a new Layer 3d-tiles For DiscreteLOD
-           // ------------------------------------------------------
-            const $3dTilesLayerDiscreteLOD = new itowns.GeometryLayer('3d-tiles');
-
-            $3dTilesLayerDiscreteLOD.preUpdate = preUpdateGeo;
-            $3dTilesLayerDiscreteLOD.update = itowns.process3dTilesNode(
+            $3dTilesLayerRequestVolumeZanzibar.preUpdate = preUpdateGeo;
+            $3dTilesLayerRequestVolumeZanzibar.update = itowns.process3dTilesNode(
                 itowns.$3dTilesCulling,
                 itowns.$3dTilesSubdivisionControl
             );
-            $3dTilesLayerDiscreteLOD.name = 'DiscreteLOD';
-            $3dTilesLayerDiscreteLOD.url = 'http://localhost:8003/tilesets/TilesetWithDiscreteLOD/tileset.json';
-            $3dTilesLayerDiscreteLOD.protocol = '3d-tiles'
-            $3dTilesLayerDiscreteLOD.overrideMaterials = true;  // custom cesium shaders are not functional
-            $3dTilesLayerDiscreteLOD.type = 'geometry';
-            $3dTilesLayerDiscreteLOD.visible = false;
 
-            itowns.View.prototype.addLayer.call(globe, $3dTilesLayerDiscreteLOD);
+            $3dTilesLayerRequestVolumeZanzibar.name = 'Zanzibar';
+            $3dTilesLayerRequestVolumeZanzibar.url = 'http://localhost:8003/tilesets/Zanzibar/tileset-public.airport.points.json';
+            $3dTilesLayerRequestVolumeZanzibar.protocol = '3d-tiles'
+            $3dTilesLayerRequestVolumeZanzibar.overrideMaterials = true;  // custom cesium shaders are not functional
+            $3dTilesLayerRequestVolumeZanzibar.type = 'geometry';
+            $3dTilesLayerRequestVolumeZanzibar.visible = false;
 
-            // debug for DiscreteLOD
+            itowns.View.prototype.addLayer.call(globe, $3dTilesLayerRequestVolumeZanzibar);
+
+            // debug for RequestVolume
             const debug3dt = new itowns.GeometryLayer('debug-3d-tiles');
             debug3dt.type = 'debug';
             debug3dt.update = updateDebug;
-
+            itowns.View.prototype.addLayer.call(globe, debug3dt, $3dTilesLayerRequestVolumeZanzibar);
             // for have the same bool for visible
-            debug3dt.visible = $3dTilesLayerDiscreteLOD.visible;
-            itowns.View.prototype.addLayer.call(globe, debug3dt, $3dTilesLayerDiscreteLOD);
-
-            // Create a new Layer 3d-tiles For Viewer Request Volume
-            // ------------------------------------------------------
-            const $3dTilesLayerRequestVolume = new itowns.GeometryLayer('3d-tiles');
-
-            $3dTilesLayerRequestVolume.preUpdate = preUpdateGeo;
-            $3dTilesLayerRequestVolume.update = itowns.process3dTilesNode(
-                itowns.$3dTilesCulling,
-                itowns.$3dTilesSubdivisionControl
-            );
-
-            $3dTilesLayerRequestVolume.name = 'RequestVolume';
-            $3dTilesLayerRequestVolume.url = 'http://localhost:8003/tilesets/TilesetWithRequestVolume/tileset.json';
-            $3dTilesLayerRequestVolume.protocol = '3d-tiles'
-            $3dTilesLayerRequestVolume.overrideMaterials = true;  // custom cesium shaders are not functional
-            $3dTilesLayerRequestVolume.type = 'geometry';
-            $3dTilesLayerRequestVolume.visible = false;
-
-            itowns.View.prototype.addLayer.call(globe, $3dTilesLayerRequestVolume);
-
-            // debug for RequestVolume
-            const debug3dtRequest = new itowns.GeometryLayer('debug-3d-tiles');
-            debug3dtRequest.type = 'debug';
-            debug3dtRequest.update = updateDebug;
-            itowns.View.prototype.addLayer.call(globe, debug3dtRequest, $3dTilesLayerRequestVolume);
-            // for have the same bool for visible
-            debug3dtRequest.visible = $3dTilesLayerRequestVolume.visible;
-
-            // Create a new Layer 3d-tiles For Zanzibar
-            // ------------------------------------------------------
-            const $3dTilesLayerZanzibar = new itowns.GeometryLayer('3d-tiles');
-
-            $3dTilesLayerZanzibar.preUpdate = preUpdateGeo;
-            $3dTilesLayerZanzibar.update = itowns.process3dTilesNode(
-                itowns.$3dTilesCulling,
-                itowns.$3dTilesSubdivisionControl
-            );
-            $3dTilesLayerZanzibar.name = 'Zanzibar';
-            $3dTilesLayerZanzibar.url = 'http://localhost:8003/tilesets/Zanzibar/tileset-public.airport.points.json';
-            $3dTilesLayerZanzibar.protocol = '3d-tiles'
-            $3dTilesLayerZanzibar.overrideMaterials = true;  // custom cesium shaders are not functional
-            $3dTilesLayerZanzibar.type = 'geometry';
-            $3dTilesLayerZanzibar.visible = false;
-
-            itowns.View.prototype.addLayer.call(globe, $3dTilesLayerZanzibar);
-
-            // debug for Zanzibar
-            const debug3dtZanzi = new itowns.GeometryLayer('debug-3d-tiles');
-            debug3dtZanzi.type = 'debug';
-            debug3dtZanzi.update = updateDebug;
-            // for have the same bool for visible
-            debug3dtZanzi.visible = $3dTilesLayerZanzibar.visible;
-            itowns.View.prototype.addLayer.call(globe, debug3dtZanzi, $3dTilesLayerZanzibar);
-
+            debug3dt.visible = $3dTilesLayerRequestVolumeZanzibar.visible;
             // Add the UI Debug
             new debug.Debug(globe, viewerDiv);
 
