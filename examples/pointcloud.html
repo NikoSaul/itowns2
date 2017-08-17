@@ -102,7 +102,7 @@
             <div id="itowns"> </div>
             <h2>Point cloud absolute URL: </h2>
             <h4>(file.js from PotreeConverter or Lopocs url)</h4>
-            <input id="url" type="url" value="https://raw.githubusercontent.com/iTowns/iTowns2-sample-data/master/pointclouds/eglise_saint_blaise_arles/eglise_saint_blaise_arles.js">
+            <input id="url" type="url" value="http://localhost:8003/tilesets/Zanzibar/PartAll/cloud.js">
             <input id="submit" type="submit" value="Connect">
             <div id="result">
                 <h3>Available pointclouds:</h3>
@@ -164,7 +164,9 @@
             <script src="../dist/itowns.js"></script>
             <script src="../dist/debug.js"></script>
             <script src="./pointcloud.js"></script>
+            <script src="../node_modules/three/examples/js/loaders/ColladaLoader2.js"></script>
             <script type="text/javascript">
+                var renderer; var exports = {};
                 if (new URL(window.location.href).searchParams.get('selector')) {
                     document.getElementsByClassName('centered')[0].style.display = 'block';
                     document.getElementById('submit').addEventListener('click', onConnectClicked);
@@ -174,4 +176,3 @@
             </script>
     </body>
 </html>
-

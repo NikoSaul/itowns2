@@ -63,6 +63,7 @@ WMS_Provider.prototype.preprocessDataLayer = function preprocessDataLayer(layer)
                   }&VERSION=${layer.version
                   }&STYLES=${layer.style
                   }&FORMAT=${layer.format
+                  }&TILED=${layer.tiled
                   }&TRANSPARENT=${layer.transparent
                   }&BBOX=%bbox` +
                   `&CRS=${layer.projection
@@ -106,6 +107,7 @@ WMS_Provider.prototype.executeCommand = function executeCommand(command) {
         'image/png': this.getColorTexture.bind(this),
         'image/jpg': this.getColorTexture.bind(this),
         'image/jpeg': this.getColorTexture.bind(this),
+        'image/tif': this.getColorTexture.bind(this),
     };
 
     const func = supportedFormats[layer.format];

@@ -1,4 +1,4 @@
-/* global itowns, debug, dat */
+/* global itowns, debug, dat, renderere*/
 
 // eslint-disable-next-line no-unused-vars
 function showPointcloud(serverUrl, fileName, lopocsTable) {
@@ -8,20 +8,28 @@ function showPointcloud(serverUrl, fileName, lopocsTable) {
     var debugGui;
     var view;
     var controls;
+    var flyControls;
+    var positionCollada ;
 
     viewerDiv = document.getElementById('viewerDiv');
     viewerDiv.style.display = 'block';
 
     itowns.THREE.Object3D.DefaultUp.set(0, 0, 1);
 
-    itowns.proj4.defs('EPSG:3946',
-        '+proj=lcc +lat_1=45.25 +lat_2=46.75 +lat_0=46 +lon_0=3 +x_0=1700000 ' +
-        '+y_0=5200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs');
+    // Define projection that we will use (taken from https://epsg.io/3946, Proj4js section)
+    itowns.proj4.defs('EPSG:32737',
+        '+proj=utm +zone=37 +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs');
+
+    // Add image of background - - -  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    const extent = new itowns.Extent(
+        'EPSG:32737',
+        531846.98189, 534923.2478,
+        9364932.41101, 9367847.98341);
 
     debugGui = new dat.GUI();
-
+    // Add an WMS imagery layer (see WMS_Provider* for valid options)
     // TODO: do we really need to disable logarithmicDepthBuffer ?
-    view = new itowns.View('EPSG:3946', viewerDiv, { renderer: { logarithmicDepthBuffer: true } });
+    view = new itowns.PlanarView(viewerDiv, extent, { renderer: renderer });
     view.mainLoop.gfxEngine.renderer.setClearColor(0xcccccc);
 
     // Configure Point Cloud layer
@@ -49,7 +57,9 @@ function showPointcloud(serverUrl, fileName, lopocsTable) {
 
 
     function placeCamera(position, lookAt) {
+        positionCollada = position;
         view.camera.camera3D.position.set(position.x, position.y, position.z);
+        // view.camera.camera3D.position.set(0,0,0);
         view.camera.camera3D.lookAt(lookAt);
         // create controls
         controls = new itowns.FirstPersonControls(view, { focusOnClick: true });
@@ -88,5 +98,75 @@ function showPointcloud(serverUrl, fileName, lopocsTable) {
         };
     }
 
-    view.addLayer(pointcloud).then(onLayerReady);
+    itowns.View.prototype.addLayer.call(view, pointcloud).then(onLayerReady);
+
+    // Add bbackground - - - -  - - - -  - - - -
+    view.tileLayer.disableSkirt = true;
+    // Add an WMS imagery layer (see WMS_Provider* for valid options)
+   view.addLayer({
+     url: 'http://localhost:8080/geoserver/Zanzibar/wms',
+        networkOptions: { crossOrigin: 'anonymous' },
+        type: 'color',
+        protocol: 'wms',
+        version: '1.3.0',
+        id: 'wms_imagery',
+        name: 'Zanzibar_Layer_orthophoto',
+        projection: 'EPSG:32737',
+        axisOrder: 'wsen',
+        tiled: 'true',
+        options: {
+            mimetype: 'image/png',
+        },
+    });
+
+
+
+    // ELEVATION :
+    view.addLayer({
+        url: 'http://localhost:8080/geoserver/Zanzibar/wms',
+        type: 'elevation',
+        protocol: 'wms',
+        networkOptions: { crossOrigin: 'anonymous' },
+        version: '1.1.0',
+        id: 'wms_elevation',
+        name: 'Zanzibar_Layer_elevation',
+        projection: 'EPSG:32737',
+        axisOrder: 'wsen',
+        heightMapWidth: 256,
+        options: {
+            mimetype: 'image/png',
+        },
+    });
+    // Since the elevation layer use color textures, specify min/max z
+    view.tileLayer.materialOptions = {
+        useColorTextureElevation: true,
+        colorTextureElevationMinZ: -31.1516,
+        colorTextureElevationMaxZ: 4,
+    };
+
+/// // /
+/*
+    // Building- - - - - -- - - - - - - -- - - -- - - - - - - - -
+    var object;
+    var loadingManager = new THREE.LoadingManager( function() {
+
+      view.scene.add( object );
+
+    } );
+
+    var loader = new THREE.ColladaLoader(loadingManager);
+  	loader.options.convertUpAxis = true;
+		loader.load( 'http://localhost:8003/modele/Edifice_01/Klauwaerts-NON-TEXTURE.dae', function ( collada ) {
+			object = collada.scene;
+			// object.scale.set( 1, 1, 1 );
+      object.position.set(positionCollada.x, positionCollada.y, positionCollada.z);
+      console.log(positionCollada);
+      object.updateMatrixWorld();
+		} );
+
+    // add light
+    var AmbientLight = new THREE.AmbientLight( 0xffffff );
+    AmbientLight.position.set(449588.55700000003, 6200917.614, 3454.564500000003 + 1000 ).normalize();
+    view.scene.add( AmbientLight );*/
+
 }

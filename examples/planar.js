@@ -37,7 +37,7 @@ view.addLayer({
         mimetype: 'image/jpeg',
     },
 });
-
+console.log(view);
 // Add an WMS elevation layer (see WMS_Provider* for valid options)
 view.addLayer({
     url: 'https://download.data.grandlyon.com/wms/grandlyon',
